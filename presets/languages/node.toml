@@ -1,0 +1,18 @@
+[metadata]
+type = "node"
+role = "package_manager"
+description = "Node.js Generic (npm)"
+
+[scripts]
+run = "node index.js"
+install = "npm install"
+install_pkg = "npm install --save"
+remove_pkg = "npm uninstall --save"
+test = "npm test"
+lint = "npm run lint"
+
+[env]
+NODE_ENV = "development"
+# Ensure npm does not try to install globally unless explicit flag which we don't provide here
+NPM_CONFIG_PREFIX = "${MNGPROJ_ROOT}/.npm-global"
+PATH = "${MNGPROJ_ROOT}/.npm-global/bin:${PATH}"

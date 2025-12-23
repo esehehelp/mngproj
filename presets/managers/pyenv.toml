@@ -1,0 +1,12 @@
+[metadata]
+type = "pyenv"
+role = "package_manager"
+description = "Python with pyenv version management"
+
+[scripts]
+run = "python main.py"
+install = "pip install -r requirements.txt"
+test = "pytest"
+
+[env]
+# Pyenv relies on shims in PATH

@@ -1,0 +1,14 @@
+[metadata]
+type = "ts"
+role = "language"
+description = "TypeScript (Generic Node.js)"
+
+[scripts]
+run = "ts-node src/index.ts"
+build = "tsc"
+test = "npm test"
+lint = "eslint ."
+install = "npm install"
+
+[env]
+NODE_ENV = "development"

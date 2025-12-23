@@ -1,0 +1,12 @@
+[metadata]
+type = "make"
+role = "tool"
+description = "Makefile runner"
+
+[scripts]
+run = "make run"
+build = "make all"
+clean = "make clean"
+test = "make test"
+
+[env]

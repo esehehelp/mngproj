@@ -1,0 +1,13 @@
+[metadata]
+type = "ruby"
+role = "language"
+description = "Ruby Language"
+
+[scripts]
+run = "ruby main.rb"
+test = "rake test"
+install = "bundle install"
+lint = "rubocop"
+
+[env]
+BUNDLE_PATH = "vendor/bundle"

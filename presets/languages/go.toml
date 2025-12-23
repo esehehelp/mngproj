@@ -1,0 +1,13 @@
+[metadata]
+type = "go"
+role = "language"
+description = "Go Programming Language"
+
+[scripts]
+run = "go run ."
+build = "go build -o dist/app ."
+test = "go test ./..."
+lint = "go vet ./..."
+
+[env]
+GOPATH = "${MNGPROJ_ROOT}/.go"

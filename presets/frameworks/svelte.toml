@@ -1,0 +1,12 @@
+[metadata]
+type = "svelte"
+role = "framework"
+description = "Svelte Framework"
+
+[scripts]
+run = "npm run dev"
+build = "npm run build"
+check = "npm run check"
+preview = "npm run preview"
+
+[env]

@@ -1,0 +1,11 @@
+[metadata]
+type = "zig"
+role = "language"
+description = "Zig Programming Language"
+
+[scripts]
+run = "zig build run"
+build = "zig build"
+test = "zig build test"
+
+[env]

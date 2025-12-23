@@ -1,0 +1,12 @@
+[metadata]
+type = "docker"
+role = "tool"
+description = "Docker Compose"
+
+[scripts]
+run = "docker compose up"
+build = "docker compose build"
+down = "docker compose down"
+logs = "docker compose logs -f"
+
+[env]

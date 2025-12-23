@@ -1,0 +1,13 @@
+[metadata]
+type = "js"
+role = "language"
+description = "JavaScript (Node.js)"
+
+[scripts]
+run = "node src/index.js"
+test = "npm test"
+install = "npm install"
+lint = "eslint ."
+
+[env]
+NODE_ENV = "development"

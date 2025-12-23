@@ -1,0 +1,14 @@
+[metadata]
+type = "nextjs"
+role = "framework"
+description = "Next.js Framework"
+
+[scripts]
+run = "npm run dev"
+build = "npm run build"
+start = "npm start"
+lint = "npm run lint"
+install = "npm install"
+
+[env]
+NODE_ENV = "development"

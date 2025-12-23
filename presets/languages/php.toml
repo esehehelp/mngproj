@@ -1,0 +1,12 @@
+[metadata]
+type = "php"
+role = "language"
+description = "PHP Language"
+
+[scripts]
+run = "php -S localhost:8000"
+test = "./vendor/bin/phpunit"
+install = "composer install"
+lint = "./vendor/bin/phpcs"
+
+[env]

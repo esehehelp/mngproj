@@ -1,0 +1,11 @@
+[metadata]
+type = "shell"
+role = "language"
+description = "Shell Scripts"
+
+[scripts]
+run = "./run.sh"
+build = "./build.sh"
+test = "./test.sh"
+
+[env]

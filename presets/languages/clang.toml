@@ -1,0 +1,15 @@
+[metadata]
+type = "clang"
+role = "language"
+description = "C/C++ using Clang"
+
+[scripts]
+run = "./main"
+build = "clang -o main main.c -Wall -Wextra"
+clean = "rm -f main"
+lint = "clang-tidy main.c"
+format = "clang-format -i *.c *.h"
+
+[env]
+CC = "clang"
+CXX = "clang++"

@@ -1,0 +1,13 @@
+[metadata]
+type = "vuejs"
+role = "framework"
+description = "Vue.js Framework"
+
+[scripts]
+run = "npm run dev"
+build = "npm run build"
+serve = "npm run serve"
+lint = "npm run lint"
+install = "npm install"
+
+[env]

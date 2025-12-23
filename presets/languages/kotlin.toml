@@ -1,0 +1,12 @@
+[metadata]
+type = "kotlin"
+role = "language"
+description = "Kotlin (Gradle Wrapper)"
+
+[scripts]
+run = "./gradlew run"
+build = "./gradlew build"
+test = "./gradlew test"
+clean = "./gradlew clean"
+
+[env]

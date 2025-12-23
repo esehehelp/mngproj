@@ -1,0 +1,18 @@
+[metadata]
+type = "uv"
+role = "package_manager"
+description = "Python with uv (Modern fast package manager)"
+
+[scripts]
+run = "uv run main.py"
+build = "uv build"
+install = "uv sync"
+install_pkg = "uv add"
+remove_pkg = "uv remove"
+lock = "uv lock"
+test = "uv run pytest"
+lint = "uv run ruff check ."
+format = "uv run ruff format ."
+
+[env]
+# uv creates virtualenv locally by default (usually .venv)

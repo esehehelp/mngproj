@@ -1,0 +1,13 @@
+[metadata]
+type = "java"
+role = "language"
+description = "Java (Standard/Maven Wrapper)"
+
+[scripts]
+run = "./mvnw clean spring-boot:run"
+build = "./mvnw clean package"
+test = "./mvnw test"
+clean = "./mvnw clean"
+
+[env]
+JAVA_TOOL_OPTIONS = "-Dfile.encoding=UTF8"

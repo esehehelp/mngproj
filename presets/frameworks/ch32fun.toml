@@ -1,0 +1,12 @@
+[metadata]
+type = "ch32fun"
+role = "framework"
+description = "CH32V003 Fun (Embedded RISC-V)"
+
+[scripts]
+build = "make"
+run = "make flash"
+clean = "make clean"
+
+[env]
+# Usually expects cross-compiler in PATH or Makefile handles it

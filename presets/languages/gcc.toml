@@ -1,0 +1,14 @@
+[metadata]
+type = "gcc"
+role = "language"
+description = "C/C++ using GCC"
+
+[scripts]
+# Simple default for single file. Complex projects should override or use make/cmake.
+run = "./main"
+build = "gcc -o main main.c -Wall -Wextra"
+clean = "rm -f main"
+lint = "cppcheck ."
+
+[env]
+CC = "gcc"

@@ -1,0 +1,16 @@
+[metadata]
+type = "pip"
+role = "package_manager"
+description = "Python with pip and venv"
+
+[scripts]
+run = "python main.py"
+install = "pip install -r requirements.txt"
+install_pkg = "pip install --target=.libs"
+remove_pkg = "pip uninstall -y --target=.libs"
+freeze = "pip freeze > requirements.txt"
+test = "pytest"
+
+[env]
+# Force packages to be installed locally to avoid global pollution
+PYTHONPATH = "${MNGPROJ_ROOT}/.libs"

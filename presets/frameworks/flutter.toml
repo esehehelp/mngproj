@@ -1,0 +1,13 @@
+[metadata]
+type = "flutter"
+role = "framework"
+description = "Flutter SDK"
+
+[scripts]
+run = "flutter run"
+build = "flutter build apk"
+test = "flutter test"
+doctor = "flutter doctor"
+clean = "flutter clean"
+
+[env]

@@ -1,0 +1,12 @@
+[metadata]
+type = "python"
+role = "language"
+description = "Python Language"
+
+[scripts]
+run = "python main.py"
+build = "echo 'No build step for python'"
+test = "pytest"
+
+[env]
+PYTHONUNBUFFERED = "1"

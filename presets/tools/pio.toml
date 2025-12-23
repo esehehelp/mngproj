@@ -1,0 +1,14 @@
+[metadata]
+type = "pio"
+role = "tool"
+description = "PlatformIO for Embedded Development"
+
+[scripts]
+run = "pio run -t upload"
+build = "pio run"
+clean = "pio run -t clean"
+lint = "pio check"
+monitor = "pio device monitor"
+
+[env]
+# Assuming user wants pio core tools in path if managed by pio

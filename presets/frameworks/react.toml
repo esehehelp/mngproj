@@ -1,0 +1,13 @@
+[metadata]
+type = "react"
+role = "framework"
+description = "React Framework (CRA/Vite)"
+
+[scripts]
+run = "npm start"
+build = "npm run build"
+test = "npm test"
+lint = "npm run lint"
+
+[env]
+CI = "false"
