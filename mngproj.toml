@@ -1,0 +1,14 @@
+[project]
+name = "mngproj"
+description = "Project Manager CLI"
+
+[[components]]
+name = "cli"
+type = "go"
+path = "."
+
+[components.scripts]
+# Override standard Go preset commands to point to the correct main entry point
+run = "go run cmd/mngproj/main.go"
+build = "go build -o bin/mngproj cmd/mngproj/main.go"
+deploy = "sudo cp bin/mngproj /usr/local/bin/mngproj"

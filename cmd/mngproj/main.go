@@ -54,8 +54,8 @@ func main() {
 	case "info":
 		handleInfo(mgr)
 	default:
-		printUsage()
-		os.Exit(1)
+		// Attempt to handle as a generic script command
+		handleGenericScript(mgr, os.Args[1], os.Args[2:])
 	}
 }
 
@@ -71,6 +71,23 @@ func printUsage() {
 	fmt.Println("  lsproj   List all projects in the current directory tree")
 	fmt.Println("  query    Query metadata of current project")
 	fmt.Println("  info     Show current project info")
+	fmt.Println("  <script> Run a custom script defined in mngproj.toml")
+}
+
+func handleGenericScript(m *manager.Manager, scriptName string, args []string) {
+	if len(args) == 0 {
+		fmt.Printf("Unknown command '%s'.\n", scriptName)
+		fmt.Println("If this is a custom script, usage is: mngproj <script> <component> [args...]")
+		printUsage()
+		os.Exit(1)
+	}
+
+	component := args[0]
+	scriptArgs := args[1:]
+
+	if err := m.ExecuteScript(component, scriptName, scriptArgs); err != nil {
+		log.Fatalf("Execution failed: %v", err)
+	}
 }
 
 func handleLsproj() {

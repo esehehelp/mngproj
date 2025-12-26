@@ -24,9 +24,18 @@ func (m *Manager) ExecuteScript(componentName, scriptName string, args []string)
 	
 	// Prepare environment
 	env := os.Environ()
+	
+	// Mapper for variable expansion
+	expandMapper := func(key string) string {
+		if key == "MNGPROJ_ROOT" {
+			return m.ProjectDir
+		}
+		return os.Getenv(key)
+	}
+
 	for k, v := range comp.Env {
-		// Expand values like $HOME, etc.
-		expandedV := os.ExpandEnv(v)
+		// Expand values like $HOME, ${MNGPROJ_ROOT}, etc.
+		expandedV := os.Expand(v, expandMapper)
 		env = append(env, fmt.Sprintf("%s=%s", k, expandedV))
 	}
 	// Inject MNGPROJ_ROOT

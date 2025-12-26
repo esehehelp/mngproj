@@ -74,6 +74,7 @@ db_migrate = "python manage.py migrate"
 | **`lsproj`** | `(なし)` | カレントディレクトリ以下の **全てのプロジェクト** (`mngproj.toml`) を再帰的に検索・表示します。 |
 | **`info`** | `(なし)` | 現在のプロジェクト情報や読み込まれているプリセットパスを表示します。 |
 | **`query`** | `(なし)` | コンポーネント情報をJSON形式で出力します (CI/CD連携用)。 |
+| **`<script>`** | `<script> <comp> [args...]` | `mngproj.toml` で定義されたカスタムスクリプトを、指定されたコンポーネントで実行します。(例: `mngproj deploy api`) |
 
 ---
 
