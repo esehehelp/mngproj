@@ -1,0 +1,10 @@
+# Binaries
+/bin/
+/dist/
+
+# Local GOPATH (from mngproj go preset)
+/.go/
+
+# IDEs
+.idea/
+.vscode/

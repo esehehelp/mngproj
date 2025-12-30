@@ -1,7 +1,8 @@
-package manager
+package test
 
 import (
 	"mngproj/pkg/config"
+	"mngproj/pkg/manager"
 	"os"
 	"path/filepath"
 	"testing"
@@ -28,7 +29,7 @@ build = "cargo build"
 		},
 	}
 
-	mgr := &Manager{
+	mgr := &manager.Manager{
 		ProjectConfig: projCfg,
 		ProjectDir:    "/tmp/dummy/project",
 		PresetsDir:    presetsDir,
@@ -96,7 +97,7 @@ run = "python manage.py runserver"
 		},
 	}
 
-	mgr := &Manager{
+	mgr := &manager.Manager{
 		ProjectConfig: projCfg,
 		ProjectDir:    "/tmp/conflict",
 		PresetsDir:    presetsDir,
@@ -125,7 +126,8 @@ run = "python manage.py runserver"
 
 func TestAllPresetsLoad(t *testing.T) {
 	cwd, _ := os.Getwd()
-	presetsPath := filepath.Join(cwd, "../../presets")
+	// Adjusted path from ../../presets to ../presets
+	presetsPath := filepath.Join(cwd, "../presets")
 
 	if _, err := os.Stat(presetsPath); err != nil {
 		t.Skipf("Presets directory not found at %s: %v", presetsPath, err)

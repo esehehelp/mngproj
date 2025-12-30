@@ -1,7 +1,8 @@
-package manager
+package test
 
 import (
 	"mngproj/pkg/config"
+	"mngproj/pkg/manager"
 	"os"
 	"path/filepath"
 	"testing"
@@ -38,7 +39,7 @@ run = "mytool run"
 			{Name: "app", Types: []string{"django", "mytool"}, Path: "."},
 		},
 	}
-	mgrDefault := &Manager{
+	mgrDefault := &manager.Manager{
 		ProjectConfig: cfgDefault,
 		ProjectDir:    "/tmp",
 		PresetsDir:    presetsDir,
@@ -62,7 +63,7 @@ run = "mytool run"
 			},
 		},
 	}
-	mgrOverride := &Manager{
+	mgrOverride := &manager.Manager{
 		ProjectConfig: cfgOverride,
 		ProjectDir:    "/tmp",
 		PresetsDir:    presetsDir,
@@ -76,7 +77,8 @@ run = "mytool run"
 func TestInstallScriptDefinition(t *testing.T) {
 	// Verify that pip preset has correct install_pkg script with isolation
 	cwd, _ := os.Getwd()
-	presetsDir := filepath.Join(cwd, "../../presets")
+	// Adjusted path from ../../presets to ../presets
+	presetsDir := filepath.Join(cwd, "../presets")
 
 	if _, err := os.Stat(presetsDir); err != nil {
 		t.Skip("Presets dir not found")

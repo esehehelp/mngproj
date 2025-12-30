@@ -72,3 +72,17 @@ func LoadPreset(presetsDir, typeName string) (*PresetConfig, error) {
 
 	return &preset, nil
 }
+
+// SaveProjectConfig writes the project configuration to the specified path
+func SaveProjectConfig(path string, cfg *ProjectConfig) error {
+	data, err := toml.Marshal(cfg)
+	if err != nil {
+		return fmt.Errorf("failed to marshal config: %w", err)
+	}
+
+	if err := os.WriteFile(path, data, 0644); err != nil {
+		return fmt.Errorf("failed to write config file: %w", err)
+	}
+
+	return nil
+}

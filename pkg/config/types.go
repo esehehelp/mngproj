@@ -21,13 +21,14 @@ type ProjectMeta struct {
 
 // ComponentConfig represents a component definition in mngproj.toml
 type ComponentConfig struct {
-	Name     string            `toml:"name"`
-	Type     string            `toml:"type"`
-	Types    []string          `toml:"types"`
-	Path     string            `toml:"path"`
-	Priority int               `toml:"priority"`
-	Env      map[string]string `toml:"env"`
-	Scripts  map[string]string `toml:"scripts"`
+	Name         string            `toml:"name"`
+	Type         string            `toml:"type"`
+	Types        []string          `toml:"types"`
+	Path         string            `toml:"path"`
+	Priority     int               `toml:"priority"`
+	Dependencies []string          `toml:"dependencies"`
+	Env          map[string]string `toml:"env"`
+	Scripts      map[string]string `toml:"scripts"`
 }
 
 // PresetConfig represents a preset definition (e.g. presets/go.toml)
@@ -38,7 +39,8 @@ type PresetConfig struct {
 }
 
 type PresetMeta struct {
-	Type        string `toml:"type"`
-	Role        string `toml:"role"` // language, framework, package_manager, tool
-	Description string `toml:"description"`
+	Type         string `toml:"type"`
+	Role         string `toml:"role"` // language, framework, package_manager, tool
+	Description  string `toml:"description"`
+	ManifestFile string `toml:"manifest_file"` // e.g. "requirements.txt", "package.json"
 }

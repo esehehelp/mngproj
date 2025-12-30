@@ -41,8 +41,10 @@ func main() {
 		handleRun(mgr, os.Args[2:])
 	case "build":
 		handleBuild(mgr, os.Args[2:])
-	case "install":
-		handleInstall(mgr, os.Args[2:])
+	case "add":
+		handleAdd(mgr, os.Args[2:])
+	case "sync":
+		handleSync(mgr, os.Args[2:])
 	case "remove":
 		handleRemove(mgr, os.Args[2:])
 	case "ls":
@@ -65,7 +67,8 @@ func printUsage() {
 	fmt.Println("  init     Initialize a new project")
 	fmt.Println("  run      Run a component")
 	fmt.Println("  build    Build a component")
-	fmt.Println("  install  Install a package to a component")
+	fmt.Println("  add      Add a package to a component and sync")
+	fmt.Println("  sync     Sync dependencies for one or all components")
 	fmt.Println("  remove   Remove a package from a component")
 	fmt.Println("  ls       List components of current project")
 	fmt.Println("  lsproj   List all projects in the current directory tree")
@@ -173,17 +176,45 @@ func handleBuild(m *manager.Manager, args []string) {
 	}
 }
 
-func handleInstall(m *manager.Manager, args []string) {
+func handleAdd(m *manager.Manager, args []string) {
 	if len(args) < 2 {
-		fmt.Println("Usage: mngproj install <component> <package...>")
+		fmt.Println("Usage: mngproj add <component> <package...>")
 		return
 	}
 	component := args[0]
-	pkgArgs := args[1:]
-	
-	if err := m.ExecuteScript(component, "install_pkg", pkgArgs); err != nil {
-		log.Fatalf("Install failed: %v", err)
+	pkgs := args[1:]
+
+	for _, pkg := range pkgs {
+		fmt.Printf("Adding dependency %q to component %q...\n", pkg, component)
+		if err := m.AddDependency(component, pkg); err != nil {
+			log.Fatalf("Failed to add dependency: %v", err)
+		}
 	}
+	
+	fmt.Println("Syncing dependencies...")
+	if err := m.SyncComponent(component); err != nil {
+		log.Fatalf("Sync failed: %v", err)
+	}
+	fmt.Println("Done.")
+}
+
+func handleSync(m *manager.Manager, args []string) {
+	var components []string
+	if len(args) > 0 {
+		components = args
+	} else {
+		components = m.ListComponents()
+	}
+
+	for _, comp := range components {
+		fmt.Printf("Syncing component %q...\n", comp)
+		if err := m.SyncComponent(comp); err != nil {
+			log.Printf("Failed to sync component %q: %v\n", comp, err)
+			// Continue with others? Or fail? Let's fail for now to be safe.
+			os.Exit(1)
+		}
+	}
+	fmt.Println("All synced.")
 }
 
 func handleRemove(m *manager.Manager, args []string) {

@@ -2,6 +2,7 @@
 type = "pip"
 role = "package_manager"
 description = "Python with pip and venv"
+manifest_file = "requirements.txt"
 
 [scripts]
 run = "python main.py"
