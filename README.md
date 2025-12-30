@@ -6,6 +6,7 @@
 
 `mngproj` は、多言語（Go, Python, Rust, Node.js 等）が混在するモノレポ開発において、ビルド・実行環境を抽象化・統一するためのCLIツールです。
 各プロジェクトディレクトリに配置された設定ファイル (`mngproj.toml`) と、言語/ツールごとに定義された **プリセット設定 (Presets)** を組み合わせることで、複雑なビルド手順や環境依存の問題を解決します。
+さらに、スクリプトの柔軟な実行、依存関係管理、並列実行、ホットリロードなどのワークフロー機能を提供します。
 
 ---
 
@@ -26,7 +27,16 @@
 
 同じコマンド（例: `run`）が複数のプリセットで定義されている場合、よりスコアの高いRoleのコマンドが自動選択されます。
 
-### 2.3 Isolation (Sandboxing)
+### 2.3 Dependency Management (Add & Sync)
+`mngproj` は各コンポーネントの依存関係を `mngproj.toml` で宣言的に管理し、対応するマニフェストファイル（`requirements.txt` など）を自動生成・同期します。
+
+### 2.4 Parallel Execution & Aggregated Logs (Up)
+複数のコンポーネントを並列で起動し、それぞれのログをコンポーネント名でプレフィックス付けして統一的に表示できます。モノレポでの開発体験を向上させます。
+
+### 2.5 Hot Reloading (Watch)
+ファイルの変更を検知し、自動的にコンポーネントを再起動するホットリロード機能を提供します。開発中の迅速なフィードバックサイクルを実現します。
+
+### 2.6 Isolation (Sandboxing)
 パッケージマネージャによるインストールがグローバル環境を汚染しないよう、`mngproj` は自動的にローカルディレクトリ（例: `.libs`, `.npm-global`）へのインストールを強制します。
 
 ---
@@ -39,6 +49,7 @@
 [project]
 name = "my-web-service"
 description = "A full-stack web application"
+root = "../" # (Optional) プロジェクトのルートディレクトリを明示的に指定。mngproj.tomlがあるディレクトリからの相対パス、または絶対パス。
 
 # (Optional) ロールごとの優先順位をカスタマイズ
 [resolution.role_priority]
@@ -51,13 +62,32 @@ name = "api"
 types = ["python", "uv", "django"]
 path = "./backend"
 
+# コンポーネントが依存するパッケージ一覧
+dependencies = ["flask==2.3.0", "requests"]
+
 [components.env]
 PORT = "8000"
 
 # ユーザー定義スクリプト (最高優先度)
 [components.scripts]
-db_migrate = "python manage.py migrate"
+# スクリプト内で引数や環境変数をテンプレートとして利用可能
+# 例: mngproj build api production -> echo building api for production
+build = "echo building {{.Name}} for {{index .Args 0}}" 
+deploy = "file:scripts/deploy.sh" # 外部シェルスクリプトファイルを指定
+
 ```
+#### スクリプトのテンプレート機能と外部ファイル (Script Templating & External Files)
+`components.scripts` 内のコマンド定義では、Goの `text/template` 構文を利用できます。
+`{{.Args}}`: コマンドに渡された引数のスライス。`{{index .Args 0}}` で個別にアクセス可能。
+`{{.Env.VAR_NAME}}`: コンポーネントの環境変数にアクセス。
+
+また、`file:` プレフィックスを使用すると、外部ファイルに記述されたスクリプトを実行できます。
+例: `deploy = "file:scripts/deploy.sh"` とすると、`project.root` または `mngproj.toml` のあるディレクトリからの相対パスで `scripts/deploy.sh` を探します。
+
+### 3.2 プリセット設定 (`presets/*.toml`)
+`presets/*.toml` ファイルは、`mngproj.toml` のコンポーネント設定と同様に `scripts` と `env` を定義できます。
+さらに、`[metadata]` セクションには `manifest_file` を指定できます。
+例: `manifest_file = "requirements.txt"` (pipの場合)
 
 ---
 
@@ -67,9 +97,12 @@ db_migrate = "python manage.py migrate"
 | :--- | :--- | :--- |
 | **`init`** | `(なし)` | カレントディレクトリに `mngproj.toml` の雛形を生成します。 |
 | **`run`** | `[comp] [args...]` | コンポーネントを実行します。(例: `mngproj run api`) |
-| **`build`** | `[comp] [args...]` | コンポーネントをビルドします。 |
-| **`install`** | `[comp] [pkgs...]` | パッケージを **ローカル環境に** インストールします。(例: `mngproj install api requests`) |
-| **`remove`** | `[comp] [pkgs...]` | パッケージを削除します。 |
+| **`build`** | `[comp] [args...]` | コンポーネントをビルドします。(例: `mngproj build api production`) |
+| **`add`** | `[comp] [pkgs...]` | パッケージをコンポーネントの依存関係に追加し、`mngproj.toml` を更新、マニフェストファイルを同期します。(例: `mngproj add api flask`) |
+| **`sync`** | `[comp]` | 指定された、または全てのコンポーネントのマニフェストファイルを更新し、依存関係を解決します。(例: `mngproj sync api`, `mngproj sync`) |
+| **`up`** | `[comp...]` | 指定された、または全てのコンポーネントを並列で実行し、ログをコンポーネント名でプレフィックス付けして表示します。(例: `mngproj up api web`) |
+| **`watch`** | `[comp...]` | 指定された、または全てのコンポーネントのソースコード変更を監視し、自動的に再起動します。(例: `mngproj watch frontend`) |
+| **`remove`** | `[comp] [pkgs...]` | パッケージをコンポーネントの依存関係から削除します。 |
 | **`ls`** | `(なし)` | 現在のプロジェクト内のコンポーネント一覧を表示します。 |
 | **`lsproj`** | `(なし)` | カレントディレクトリ以下の **全てのプロジェクト** (`mngproj.toml`) を再帰的に検索・表示します。 |
 | **`info`** | `(なし)` | 現在のプロジェクト情報や読み込まれているプリセットパスを表示します。 |
@@ -82,6 +115,7 @@ db_migrate = "python manage.py migrate"
 
 ```text
 ~/Work/monorepo/
+├── mngproj.toml        # プロジェクトルートに置かれる設定ファイル
 ├── presets/            # カスタムプリセット (Optional)
 │   ├── languages/      # go.toml, python.toml ...
 │   ├── frameworks/     # django.toml, react.toml ...
@@ -108,14 +142,30 @@ go build -o mngproj cmd/mngproj/main.go
 ./mngproj init
 
 # 3. コンポーネント定義 (mngproj.tomlを編集)
+# [project]
+# name = "my-mono-repo"
+# root = "." # このディレクトリをルートとする
+
 # [[components]]
-# name = "app"
+# name = "backend"
 # types = ["python", "uv"]
-# path = "."
+# path = "services/backend"
+# dependencies = ["flask==2.3.0"] # 依存関係を直接記述することも可能
 
-# 4. パッケージ追加 (ローカルインストール)
-./mngproj install app flask
+# [[components]]
+# name = "frontend"
+# types = ["node", "react"]
+# path = "services/frontend"
 
-# 5. 実行
-./mngproj run app
+# 4. パッケージ追加 (mngproj.tomlに記録し、自動同期)
+./mngproj add backend requests
+
+# 5. 全コンポーネネントの依存関係を同期
+./mngproj sync
+
+# 6. バックエンドとフロントエンドを並列起動 (mngproj.tomlのrunスクリプトが使われる)
+./mngproj up backend frontend
+
+# 7. フロントエンドのファイル変更を監視して自動リロード
+./mngproj watch frontend
 ```
