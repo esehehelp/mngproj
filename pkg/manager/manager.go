@@ -24,9 +24,20 @@ func New(startDir string) (*Manager, error) {
 		return nil, err
 	}
 
+	configDir := filepath.Dir(configPath)
+	projectDir := configDir
+
+	if cfg.Project.Root != "" {
+		if filepath.IsAbs(cfg.Project.Root) {
+			projectDir = cfg.Project.Root
+		} else {
+			projectDir = filepath.Join(configDir, cfg.Project.Root)
+		}
+	}
+
 	return &Manager{
 		ProjectConfig: cfg,
-		ProjectDir:    filepath.Dir(configPath),
+		ProjectDir:    projectDir,
 		PresetsDir:    determinePresetsDir(),
 	}, nil
 }
@@ -465,15 +476,19 @@ func (m *Manager) SyncComponent(compName string) error {
 
 
 
-		// 2. Execute 'install' script
+			// 2. Execute 'install' script
 
 
 
-		return m.ExecuteScript(compName, "install", nil)
+			return m.ExecuteScript(compName, "install", nil, nil, nil)
 
 
 
-	}
+		}
+
+
+
+		
 
 
 

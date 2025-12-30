@@ -1,15 +1,22 @@
 package main
 
 import (
+	"bytes"
 	"encoding/json"
 	"fmt"
+	"io"
 	"log"
 	"mngproj/pkg/manager"
 	"os"
-	"path/filepath" // Added for filepath.Rel
+	"os/exec"
+	"path/filepath"
+	"strings"
+	"sync"
+	"syscall"
 	"text/tabwriter"
+	"time"
 
-	"mngproj/pkg/config" // Added for config.LoadProjectConfig
+	"mngproj/pkg/config"
 )
 
 func main() {
@@ -45,6 +52,10 @@ func main() {
 		handleAdd(mgr, os.Args[2:])
 	case "sync":
 		handleSync(mgr, os.Args[2:])
+	case "up":
+		handleUp(mgr, os.Args[2:])
+	case "watch":
+		handleWatch(mgr, os.Args[2:])
 	case "remove":
 		handleRemove(mgr, os.Args[2:])
 	case "ls":
@@ -69,6 +80,8 @@ func printUsage() {
 	fmt.Println("  build    Build a component")
 	fmt.Println("  add      Add a package to a component and sync")
 	fmt.Println("  sync     Sync dependencies for one or all components")
+	fmt.Println("  up       Run components in parallel with aggregated logs")
+	fmt.Println("  watch    Watch for changes and reload (Hot Reload)")
 	fmt.Println("  remove   Remove a package from a component")
 	fmt.Println("  ls       List components of current project")
 	fmt.Println("  lsproj   List all projects in the current directory tree")
@@ -88,7 +101,7 @@ func handleGenericScript(m *manager.Manager, scriptName string, args []string) {
 	component := args[0]
 	scriptArgs := args[1:]
 
-	if err := m.ExecuteScript(component, scriptName, scriptArgs); err != nil {
+	if err := m.ExecuteScript(component, scriptName, scriptArgs, nil, nil); err != nil {
 		log.Fatalf("Execution failed: %v", err)
 	}
 }
@@ -157,7 +170,7 @@ func handleRun(m *manager.Manager, args []string) {
 	component := args[0]
 	scriptArgs := args[1:]
 	
-	if err := m.ExecuteScript(component, "run", scriptArgs); err != nil {
+	if err := m.ExecuteScript(component, "run", scriptArgs, nil, nil); err != nil {
 		log.Fatalf("Execution failed: %v", err)
 	}
 }
@@ -171,7 +184,7 @@ func handleBuild(m *manager.Manager, args []string) {
 	component := args[0]
 	scriptArgs := args[1:]
 	
-	if err := m.ExecuteScript(component, "build", scriptArgs); err != nil {
+	if err := m.ExecuteScript(component, "build", scriptArgs, nil, nil); err != nil {
 		log.Fatalf("Build failed: %v", err)
 	}
 }
@@ -210,11 +223,133 @@ func handleSync(m *manager.Manager, args []string) {
 		fmt.Printf("Syncing component %q...\n", comp)
 		if err := m.SyncComponent(comp); err != nil {
 			log.Printf("Failed to sync component %q: %v\n", comp, err)
-			// Continue with others? Or fail? Let's fail for now to be safe.
 			os.Exit(1)
 		}
 	}
 	fmt.Println("All synced.")
+}
+
+func handleUp(m *manager.Manager, args []string) {
+	var components []string
+	if len(args) > 0 {
+		components = args
+	} else {
+		components = m.ListComponents()
+	}
+
+	fmt.Printf("Starting %d components: %v\n", len(components), components)
+
+	var wg sync.WaitGroup
+	for _, name := range components {
+		wg.Add(1)
+		go func(compName string) {
+			defer wg.Done()
+			pw := &PrefixWriter{prefix: compName, writer: os.Stdout}
+			if err := m.ExecuteScript(compName, "run", nil, pw, pw); err != nil {
+				fmt.Fprintf(pw, "Error: %v\n", err)
+			}
+		}(name)
+	}
+	wg.Wait()
+}
+
+func handleWatch(m *manager.Manager, args []string) {
+	var comps []string
+	if len(args) > 0 {
+		comps = args
+	} else {
+		comps = m.ListComponents()
+	}
+	
+	var wg sync.WaitGroup
+	for _, c := range comps {
+		wg.Add(1)
+		go func(name string) {
+			defer wg.Done()
+			watchComponent(m, name)
+		}(c)
+	}
+	wg.Wait()
+}
+
+func watchComponent(m *manager.Manager, compName string) {
+	comp, err := m.ResolveComponent(compName)
+	if err != nil {
+		log.Printf("[%s] Watch Error: %v", compName, err)
+		return
+	}
+	
+	root := comp.AbsPath
+	fmt.Printf("[%s] Watching %s for changes...\n", compName, root)
+
+	var currentCmd *exec.Cmd
+	var lastModTime time.Time
+	
+	restart := make(chan bool, 1)
+	restart <- true
+
+	go func() {
+		for {
+			time.Sleep(1 * time.Second)
+			
+			var maxModTime time.Time
+			err := filepath.Walk(root, func(path string, info os.FileInfo, err error) error {
+				if err != nil { return nil }
+				if info.IsDir() {
+					if strings.HasPrefix(info.Name(), ".") || info.Name() == "node_modules" || info.Name() == "target" || info.Name() == "dist" || info.Name() == "build" {
+						return filepath.SkipDir
+					}
+				}
+				if !info.IsDir() {
+					if info.ModTime().After(maxModTime) {
+						maxModTime = info.ModTime()
+					}
+				}
+				return nil
+			})
+			
+			if err == nil {
+				if lastModTime.IsZero() {
+					lastModTime = maxModTime
+				} else if maxModTime.After(lastModTime) {
+					fmt.Printf("[%s] Change detected. Reloading...\n", compName)
+					lastModTime = maxModTime
+					restart <- true
+				}
+			}
+		}
+	}()
+
+	for range restart {
+		if currentCmd != nil && currentCmd.Process != nil {
+			// Try to kill process group to catch children
+			syscall.Kill(-currentCmd.Process.Pid, syscall.SIGKILL)
+			currentCmd.Process.Kill()
+			currentCmd.Wait()
+		}
+
+		pw := &PrefixWriter{prefix: compName, writer: os.Stdout}
+		// Pass SysProcAttr to set process group for group kill support
+		// Note: ExecuteScriptAsync creates the cmd, we need to modify it inside if possible.
+		// Current API doesn't allow modifying cmd before Start.
+		// For now simple Process.Kill is used.
+		
+		cmd, err := m.ExecuteScriptAsync(compName, "run", nil, pw, pw)
+		if err != nil {
+			fmt.Fprintf(pw, "Start Error: %v\n", err)
+			currentCmd = nil
+		} else {
+			// Set process group ID so we can kill children if needed
+			// But since we can't inject it before Start() in ExecuteScriptAsync without changing API again,
+			// we rely on basic kill.
+			// Ideally ExecuteScriptAsync should take an option struct.
+			
+			currentCmd = cmd
+			go func() {
+				cmd.Wait()
+			}()
+		}
+	}
 }
 
 func handleRemove(m *manager.Manager, args []string) {
@@ -225,7 +360,7 @@ func handleRemove(m *manager.Manager, args []string) {
 	component := args[0]
 	pkgArgs := args[1:]
 	
-	if err := m.ExecuteScript(component, "remove_pkg", pkgArgs); err != nil {
+	if err := m.ExecuteScript(component, "remove_pkg", pkgArgs, nil, nil); err != nil {
 		log.Fatalf("Remove failed: %v", err)
 	}
 }
@@ -252,4 +387,24 @@ func handleQuery(m *manager.Manager, args []string) {
 	if err := encoder.Encode(m.ProjectConfig.Components); err != nil {
 		log.Fatalf("Failed to encode components: %v", err)
 	}
+}
+
+// PrefixWriter prefixes each line with a tag
+type PrefixWriter struct {
+	prefix string
+	writer io.Writer
+}
+
+func (w *PrefixWriter) Write(p []byte) (n int, err error) {
+	lines := bytes.Split(p, []byte("\n"))
+	for i, line := range lines {
+		if len(line) == 0 && i == len(lines)-1 {
+			continue
+		}
+		// Note: This naive implementation might interleave outputs if writer is not concurrent-safe.
+		// Since os.Stdout writes are generally atomic for small buffers, it's acceptable for a CLI tool.
+		out := fmt.Sprintf("[%s] %s\n", w.prefix, string(line))
+		w.writer.Write([]byte(out))
+	}
+	return len(p), nil
 }

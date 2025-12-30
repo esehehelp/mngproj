@@ -17,6 +17,7 @@ type ProjectMeta struct {
 	Name        string   `toml:"name"`
 	Description string   `toml:"description"`
 	Tags        []string `toml:"tags"`
+	Root        string   `toml:"root"` // Optional: explicit project root
 }
 
 // ComponentConfig represents a component definition in mngproj.toml
