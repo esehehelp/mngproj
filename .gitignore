@@ -2,6 +2,7 @@ mngproj
 *.out
 *.test
 bin/
+.go/
 .DS_Store
 .idea/
 .vscode/
