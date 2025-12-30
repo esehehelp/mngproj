@@ -27,6 +27,7 @@ type ComponentConfig struct {
 	Types        []string          `toml:"types"`
 	Path         string            `toml:"path"`
 	Priority     int               `toml:"priority"`
+	Groups       []string          `toml:"groups"`
 	Dependencies []string          `toml:"dependencies"`
 	Env          map[string]string `toml:"env"`
 	Scripts      map[string]string `toml:"scripts"`

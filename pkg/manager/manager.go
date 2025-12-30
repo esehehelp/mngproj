@@ -476,15 +476,75 @@ func (m *Manager) SyncComponent(compName string) error {
 
 
 
-			// 2. Execute 'install' script
+				// 2. Execute 'install' script
 
 
 
-			return m.ExecuteScript(compName, "install", nil, nil, nil)
+				return m.ExecuteScript(compName, "install", nil, nil, nil)
 
 
 
-		}
+			}
+
+
+
+			
+
+
+
+			// ListComponentsByGroup returns a list of component names that belong to the specified group
+
+
+
+			func (m *Manager) ListComponentsByGroup(group string) []string {
+
+
+
+				var names []string
+
+
+
+				for _, c := range m.ProjectConfig.Components {
+
+
+
+					for _, g := range c.Groups {
+
+
+
+						if g == group {
+
+
+
+							names = append(names, c.Name)
+
+
+
+							break
+
+
+
+						}
+
+
+
+					}
+
+
+
+				}
+
+
+
+				return names
+
+
+
+			}
+
+
+
+			
 
 
 

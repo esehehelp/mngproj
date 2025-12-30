@@ -230,11 +230,49 @@ func handleSync(m *manager.Manager, args []string) {
 }
 
 func handleUp(m *manager.Manager, args []string) {
-	var components []string
-	if len(args) > 0 {
-		components = args
+	targetComps := make(map[string]bool)
+
+	if len(args) == 0 {
+		// All components
+		for _, c := range m.ListComponents() {
+			targetComps[c] = true
+		}
 	} else {
-		components = m.ListComponents()
+		// Resolve args
+		allCompMap := make(map[string]bool)
+		for _, c := range m.ListComponents() {
+			allCompMap[c] = true
+		}
+
+		for _, arg := range args {
+			// 1. Is it a component?
+			if allCompMap[arg] {
+				targetComps[arg] = true
+				continue
+			}
+
+			// 2. Is it a group?
+			groupComps := m.ListComponentsByGroup(arg)
+			if len(groupComps) > 0 {
+				for _, c := range groupComps {
+					targetComps[c] = true
+				}
+				continue
+			}
+
+			fmt.Printf("Warning: Argument %q matches no component or group.\n", arg)
+		}
+	}
+
+	if len(targetComps) == 0 {
+		fmt.Println("No components found to start.")
+		return
+	}
+
+	// Convert map to slice
+	var components []string
+	for c := range targetComps {
+		components = append(components, c)
 	}
 
 	fmt.Printf("Starting %d components: %v\n", len(components), components)
