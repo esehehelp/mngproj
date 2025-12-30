@@ -1,0 +1,21 @@
+gitignore = [
+    "node_modules/",
+    "bun.lockb",
+    ".env"
+]
+
+[metadata]
+type = "bun"
+role = "language"
+description = "Bun - A fast all-in-one JavaScript runtime"
+required_tools = ["bun"]
+manifest_file = "package.json"
+
+[scripts]
+run = "bun run index.ts"
+dev = "bun run --watch index.ts"
+test = "bun test"
+install = "bun install"
+install_pkg = "bun add"
+remove_pkg = "bun remove"
+build = "bun build ./index.ts --outdir ./dist"

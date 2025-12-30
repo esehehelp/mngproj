@@ -1,14 +1,16 @@
+gitignore = [
+    "dist/",
+    "built/",
+    "tsconfig.tsbuildinfo"
+]
+
 [metadata]
 type = "ts"
 role = "language"
-description = "TypeScript (Generic Node.js)"
+description = "TypeScript Language"
+required_tools = ["tsc"]
 
 [scripts]
-run = "ts-node src/index.ts"
 build = "tsc"
-test = "npm test"
-lint = "eslint ."
-install = "npm install"
-
-[env]
-NODE_ENV = "development"
+run = "ts-node index.ts"
+test = "ts-node test.ts"

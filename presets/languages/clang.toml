@@ -1,15 +1,17 @@
+gitignore = [
+    "*.o",
+    "*.out",
+    "compile_commands.json",
+    ".cache/"
+]
+
 [metadata]
 type = "clang"
 role = "language"
-description = "C/C++ using Clang"
+description = "C/C++ with Clang"
+required_tools = ["clang"]
 
 [scripts]
-run = "./main"
-build = "clang -o main main.c -Wall -Wextra"
-clean = "rm -f main"
-lint = "clang-tidy main.c"
-format = "clang-format -i *.c *.h"
-
-[env]
-CC = "clang"
-CXX = "clang++"
+build = "clang -o app main.c"
+run = "./app"
+clean = "rm -f app *.o"

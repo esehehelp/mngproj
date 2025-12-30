@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"mngproj/pkg/config"
 	"os"
+	"os/exec"
 	"path/filepath"
 )
 
@@ -38,11 +39,11 @@ func New(startDir string) (*Manager, error) {
 	return &Manager{
 		ProjectConfig: cfg,
 		ProjectDir:    projectDir,
-		PresetsDir:    determinePresetsDir(),
+		PresetsDir:    DeterminePresetsDir(),
 	}, nil
 }
 
-func determinePresetsDir() string {
+func DeterminePresetsDir() string {
 	// Priority:
 	// 1. MNGPROJ_PRESETS_DIR env var
 	// 2. $HOME/.config/mngproj/presets
@@ -496,7 +497,15 @@ func (m *Manager) SyncComponent(compName string) error {
 
 
 
+			
+
+
+
 			func (m *Manager) ListComponentsByGroup(group string) []string {
+
+
+
+			
 
 
 
@@ -504,7 +513,15 @@ func (m *Manager) SyncComponent(compName string) error {
 
 
 
+			
+
+
+
 				for _, c := range m.ProjectConfig.Components {
+
+
+
+			
 
 
 
@@ -512,7 +529,15 @@ func (m *Manager) SyncComponent(compName string) error {
 
 
 
+			
+
+
+
 						if g == group {
+
+
+
+			
 
 
 
@@ -520,7 +545,15 @@ func (m *Manager) SyncComponent(compName string) error {
 
 
 
+			
+
+
+
 							break
+
+
+
+			
 
 
 
@@ -528,7 +561,15 @@ func (m *Manager) SyncComponent(compName string) error {
 
 
 
+			
+
+
+
 					}
+
+
+
+			
 
 
 
@@ -536,11 +577,275 @@ func (m *Manager) SyncComponent(compName string) error {
 
 
 
+			
+
+
+
 				return names
 
 
 
+			
+
+
+
 			}
+
+
+
+			
+
+
+
+			
+
+
+
+			
+
+
+
+			// ValidateTools checks if all required tools defined in presets are available in PATH
+
+
+
+			
+
+
+
+			func (m *Manager) ValidateTools() error {
+
+
+
+			
+
+
+
+				checked := make(map[string]bool)
+
+
+
+			
+
+
+
+				for _, comp := range m.ProjectConfig.Components {
+
+
+
+			
+
+
+
+					types := comp.Types
+
+
+
+			
+
+
+
+					if len(types) == 0 && comp.Type != "" {
+
+
+
+			
+
+
+
+						types = []string{comp.Type}
+
+
+
+			
+
+
+
+					}
+
+
+
+			
+
+
+
+			
+
+
+
+			
+
+
+
+					for _, tName := range types {
+
+
+
+			
+
+
+
+						if checked[tName] {
+
+
+
+			
+
+
+
+							continue
+
+
+
+			
+
+
+
+						}
+
+
+
+			
+
+
+
+						preset, err := config.LoadPreset(m.PresetsDir, tName)
+
+
+
+			
+
+
+
+						if err != nil {
+
+
+
+			
+
+
+
+							// Warn but continue? Or fail?
+
+
+
+			
+
+
+
+							// Failing is safer to ensure environment consistency.
+
+
+
+			
+
+
+
+							return fmt.Errorf("failed to load preset %q for tool validation: %w", tName, err)
+
+
+
+			
+
+
+
+						}
+
+
+
+			
+
+
+
+			
+
+
+
+			
+
+
+
+						for _, tool := range preset.Metadata.RequiredTools {
+
+
+
+			
+
+
+
+							if _, err := exec.LookPath(tool); err != nil {
+
+
+
+			
+
+
+
+								return fmt.Errorf("required tool %q (from preset %q) not found in PATH", tool, tName)
+
+
+
+			
+
+
+
+							}
+
+
+
+			
+
+
+
+						}
+
+
+
+			
+
+
+
+						checked[tName] = true
+
+
+
+			
+
+
+
+					}
+
+
+
+			
+
+
+
+				}
+
+
+
+			
+
+
+
+				return nil
+
+
+
+			
+
+
+
+			}
+
+
+
+			
+
+
+
+			
 
 
 

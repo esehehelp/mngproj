@@ -1,0 +1,20 @@
+gitignore = [
+    ".gradle/",
+    "build/",
+    "gradle/",
+    "gradlew",
+    "gradlew.bat"
+]
+
+[metadata]
+type = "gradle"
+role = "package_manager"
+description = "Gradle Build Tool"
+required_tools = ["gradle"] # Typically project uses ./gradlew but we assume installed gradle for init
+manifest_file = "build.gradle"
+
+[scripts]
+build = "gradle build"
+run = "gradle run"
+test = "gradle test"
+clean = "gradle clean"

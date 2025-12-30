@@ -1,13 +1,23 @@
+gitignore = [
+    ".dart_tool/",
+    "build/",
+    ".packages",
+    ".pub",
+    "pubspec.lock"
+]
+
 [metadata]
 type = "flutter"
 role = "framework"
-description = "Flutter SDK"
+description = "Flutter UI Toolkit"
+required_tools = ["flutter"]
+manifest_file = "pubspec.yaml"
 
 [scripts]
 run = "flutter run"
 build = "flutter build apk"
 test = "flutter test"
-doctor = "flutter doctor"
+install = "flutter pub get"
 clean = "flutter clean"
-
-[env]
+format = "dart format ."
+lint = "flutter analyze"

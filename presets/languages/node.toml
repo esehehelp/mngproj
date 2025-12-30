@@ -1,18 +1,25 @@
+gitignore = [
+    "node_modules/",
+    "npm-debug.log",
+    "yarn-error.log",
+    ".env"
+]
+
 [metadata]
 type = "node"
-role = "package_manager"
-description = "Node.js Generic (npm)"
+role = "language"
+description = "Node.js JavaScript Runtime"
+required_tools = ["node", "npm"]
+manifest_file = "package.json"
 
 [scripts]
-run = "node index.js"
-install = "npm install"
-install_pkg = "npm install --save"
-remove_pkg = "npm uninstall --save"
+run = "npm start"
+build = "npm run build"
 test = "npm test"
-lint = "npm run lint"
+install = "npm install"
+install_pkg = "npm install"
+remove_pkg = "npm uninstall"
 
 [env]
-NODE_ENV = "development"
-# Ensure npm does not try to install globally unless explicit flag which we don't provide here
-NPM_CONFIG_PREFIX = "${MNGPROJ_ROOT}/.npm-global"
-PATH = "${MNGPROJ_ROOT}/.npm-global/bin:${PATH}"
+# Local npm bin path
+PATH = "${MNGPROJ_COMPONENT_ROOT}/node_modules/.bin:${PATH}"

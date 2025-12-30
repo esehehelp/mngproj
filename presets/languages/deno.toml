@@ -1,0 +1,18 @@
+gitignore = [
+    "deno.lock"
+]
+
+[metadata]
+type = "deno"
+role = "language"
+description = "Deno - A modern runtime for JavaScript and TypeScript"
+required_tools = ["deno"]
+manifest_file = "deno.json"
+
+[scripts]
+run = "deno run --allow-all main.ts"
+test = "deno test"
+fmt = "deno fmt"
+lint = "deno lint"
+build = "deno compile --allow-all main.ts"
+install = "deno cache main.ts"

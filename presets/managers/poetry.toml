@@ -1,0 +1,23 @@
+gitignore = [
+    "poetry.lock",
+    ".venv/"
+]
+
+[metadata]
+type = "poetry"
+role = "package_manager"
+description = "Poetry - Python dependency management"
+required_tools = ["poetry"]
+manifest_file = "pyproject.toml"
+
+[scripts]
+install = "poetry install"
+install_pkg = "poetry add"
+remove_pkg = "poetry remove"
+run = "poetry run python main.py"
+test = "poetry run pytest"
+build = "poetry build"
+lock = "poetry lock"
+
+[env]
+# Poetry manages virtualenvs itself, usually in cache or .venv if configured

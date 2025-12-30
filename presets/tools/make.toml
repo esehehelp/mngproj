@@ -1,12 +1,13 @@
+gitignore = []
+
 [metadata]
 type = "make"
 role = "tool"
-description = "Makefile runner"
+description = "GNU Make"
+required_tools = ["make"]
 
 [scripts]
+build = "make build"
 run = "make run"
-build = "make all"
-clean = "make clean"
 test = "make test"
-
-[env]
+clean = "make clean"

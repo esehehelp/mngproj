@@ -1,13 +1,21 @@
+gitignore = [
+    "*.class",
+    "*.jar",
+    "*.war",
+    "target/",
+    "build/",
+    ".gradle/",
+    ".idea/",
+    "*.iml"
+]
+
 [metadata]
 type = "java"
 role = "language"
-description = "Java (Standard/Maven Wrapper)"
+description = "Java Programming Language"
+required_tools = ["java", "javac"]
 
 [scripts]
-run = "./mvnw clean spring-boot:run"
-build = "./mvnw clean package"
-test = "./mvnw test"
-clean = "./mvnw clean"
-
-[env]
-JAVA_TOOL_OPTIONS = "-Dfile.encoding=UTF8"
+run = "java Main"
+build = "javac Main.java"
+test = "java Test"

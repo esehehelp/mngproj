@@ -1,12 +1,13 @@
+gitignore = []
+
 [metadata]
 type = "docker"
 role = "tool"
-description = "Docker Compose"
+description = "Docker Containerization"
+required_tools = ["docker"]
 
 [scripts]
-run = "docker compose up"
-build = "docker compose build"
+build = "docker build -t app ."
+run = "docker run --rm app"
+up = "docker compose up"
 down = "docker compose down"
-logs = "docker compose logs -f"
-
-[env]

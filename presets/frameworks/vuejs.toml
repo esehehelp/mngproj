@@ -1,7 +1,14 @@
+gitignore = [
+    "node_modules/",
+    "dist/",
+    ".env.local"
+]
+
 [metadata]
 type = "vuejs"
 role = "framework"
 description = "Vue.js Framework"
+required_tools = ["npm"]
 
 [scripts]
 run = "npm run dev"

@@ -39,6 +39,9 @@
 ### 2.6 Isolation (Sandboxing)
 パッケージマネージャによるインストールがグローバル環境を汚染しないよう、`mngproj` は自動的にローカルディレクトリ（例: `.libs`, `.npm-global`）へのインストールを強制します。
 
+### 2.7 Multi-Platform Support
+Windows, Linux, macOS での動作をサポートしています。OSに応じたシェルの切り替え（WindowsではPowerShell）や、OS固有のプリセット読み込みを自動的に行います。
+
 ---
 
 ## 3. 設定ファイル構成 (Configuration)
@@ -61,6 +64,8 @@ name = "api"
 # 複数のプリセットを組み合わせる (Mixin)
 types = ["python", "uv", "django"]
 path = "./backend"
+# 任意のグループ名を付与してまとめて操作可能 (例: mngproj up backend)
+groups = ["backend", "core"]
 
 # コンポーネントが依存するパッケージ一覧
 dependencies = ["flask==2.3.0", "requests"]
@@ -86,8 +91,7 @@ deploy = "file:scripts/deploy.sh" # 外部シェルスクリプトファイル�
 
 ### 3.2 プリセット設定 (`presets/*.toml`)
 `presets/*.toml` ファイルは、`mngproj.toml` のコンポーネント設定と同様に `scripts` と `env` を定義できます。
-さらに、`[metadata]` セクションには `manifest_file` を指定できます。
-例: `manifest_file = "requirements.txt"` (pipの場合)
+さらに、`[metadata]` セクションには `manifest_file`, `required_tools`, `gitignore` を指定できます。
 
 ---
 
@@ -95,13 +99,15 @@ deploy = "file:scripts/deploy.sh" # 外部シェルスクリプトファイル�
 
 | コマンド | 引数例 | 説明 |
 | :--- | :--- | :--- |
-| **`init`** | `(なし)` | カレントディレクトリに `mngproj.toml` の雛形を生成します。 |
+| **`init`** | `[type]` | カレントディレクトリに `mngproj.toml` の雛形と `.gitignore` を生成します。`type` で言語を指定可能（例: `go`, `python`, `node`）。 |
 | **`run`** | `[comp] [args...]` | コンポーネントを実行します。(例: `mngproj run api`) |
-| **`build`** | `[comp] [args...]` | コンポーネントをビルドします。(例: `mngproj build api production`) |
+| **`build`** | `[comp] [args...]` | コンポーネントをビルドします。 |
 | **`add`** | `[comp] [pkgs...]` | パッケージをコンポーネントの依存関係に追加し、`mngproj.toml` を更新、マニフェストファイルを同期します。(例: `mngproj add api flask`) |
-| **`sync`** | `[comp]` | 指定された、または全てのコンポーネントのマニフェストファイルを更新し、依存関係を解決します。(例: `mngproj sync api`, `mngproj sync`) |
-| **`up`** | `[comp...]` | 指定された、または全てのコンポーネントを並列で実行し、ログをコンポーネント名でプレフィックス付けして表示します。(例: `mngproj up api web`) |
-| **`watch`** | `[comp...]` | 指定された、または全てのコンポーネントのソースコード変更を監視し、自動的に再起動します。(例: `mngproj watch frontend`) |
+| **`sync`** | `[comp]` | 指定された、または全てのコンポーネントのマニフェストファイルを更新し、依存関係を解決します。必要なツールのインストールチェックも行います。 |
+| **`up`** | `[comp/group...]` | 指定されたコンポーネントまたはグループを並列で実行し、ログをプレフィックス付きで表示します。(例: `mngproj up api web`) |
+| **`watch`** | `[comp...]` | コンポーネントのソースコード変更を監視し、自動的に再起動します。(例: `mngproj watch frontend`) |
+| **`lfs`** | `[threshold_mb]` | 大容量ファイルを検出し、`.gitattributes` に Git LFS 設定を追加します。(例: `mngproj lfs 50`) |
+| **`install-self`** | `(なし)` | 現在のソースコードから `mngproj` をビルドし、システムにインストールします。 |
 | **`remove`** | `[comp] [pkgs...]` | パッケージをコンポーネントの依存関係から削除します。 |
 | **`ls`** | `(なし)` | 現在のプロジェクト内のコンポーネント一覧を表示します。 |
 | **`lsproj`** | `(なし)` | カレントディレクトリ以下の **全てのプロジェクト** (`mngproj.toml`) を再帰的に検索・表示します。 |
@@ -111,7 +117,7 @@ deploy = "file:scripts/deploy.sh" # 外部シェルスクリプトファイル�
 
 ---
 
-## 5. ディレクトリ構造
+## 5. ディレクトリ構造 & プリセット
 
 ```text
 ~/Work/monorepo/
@@ -129,6 +135,12 @@ deploy = "file:scripts/deploy.sh" # 外部シェルスクリプトファイル�
         ├── mngproj.toml
         └── ...
 ```
+
+### 利用可能なプリセット (Available Presets)
+- **Languages:** `go`, `python`, `node`, `ts`, `rust`, `java`, `c++` (`clang`/`gcc`), `deno`, `bun`, `php`, `ruby`
+- **Frameworks:** `nextjs`, `react`, `vuejs`, `svelte`, `flutter`
+- **Managers:** `pip`, `uv`, `poetry`, `npm`, `maven`, `gradle`
+- **Tools:** `docker`, `make`
 
 ---
 

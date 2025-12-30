@@ -1,18 +1,20 @@
+gitignore = [
+    ".venv/",
+    "uv.lock"
+]
+
 [metadata]
 type = "uv"
 role = "package_manager"
-description = "Python with uv (Modern fast package manager)"
+description = "uv - An extremely fast Python package installer and resolver"
+required_tools = ["uv"]
+manifest_file = "pyproject.toml"
 
 [scripts]
-run = "uv run main.py"
-build = "uv build"
 install = "uv sync"
 install_pkg = "uv add"
 remove_pkg = "uv remove"
-lock = "uv lock"
-test = "uv run pytest"
-lint = "uv run ruff check ."
-format = "uv run ruff format ."
+run = "uv run"
 
 [env]
-# uv creates virtualenv locally by default (usually .venv)
+VIRTUAL_ENV = "${MNGPROJ_COMPONENT_ROOT}/.venv"

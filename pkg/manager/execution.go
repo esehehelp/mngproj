@@ -7,6 +7,7 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"runtime"
 	"strings"
 	"text/template"
 )
@@ -44,8 +45,11 @@ func (m *Manager) ExecuteScriptAsync(componentName, scriptName string, args []st
 	
 	// Mapper for variable expansion
 	expandMapper := func(key string) string {
-		if key == "MNGPROJ_ROOT" {
+		switch key {
+		case "MNGPROJ_ROOT":
 			return m.ProjectDir
+		case "MNGPROJ_COMPONENT_ROOT", "COMPONENT_ROOT":
+			return comp.AbsPath
 		}
 		return os.Getenv(key)
 	}
@@ -56,9 +60,11 @@ func (m *Manager) ExecuteScriptAsync(componentName, scriptName string, args []st
 		env = append(env, fmt.Sprintf("%s=%s", k, expandedV))
 		envMap[k] = expandedV
 	}
-	// Inject MNGPROJ_ROOT
+	// Inject MNGPROJ_ROOT and MNGPROJ_COMPONENT_ROOT
 	env = append(env, fmt.Sprintf("MNGPROJ_ROOT=%s", m.ProjectDir))
 	envMap["MNGPROJ_ROOT"] = m.ProjectDir
+	env = append(env, fmt.Sprintf("MNGPROJ_COMPONENT_ROOT=%s", comp.AbsPath))
+	envMap["MNGPROJ_COMPONENT_ROOT"] = comp.AbsPath
 
 	// Handle "file:" prefix
 	if strings.HasPrefix(cmdStr, "file:") {
@@ -117,7 +123,16 @@ func (m *Manager) ExecuteScriptAsync(componentName, scriptName string, args []st
 		fmt.Printf("[%s] Executing: %s\n", componentName, fullCmd)
 	}
 
-	cmd := exec.Command("sh", "-c", fullCmd)
+	var shell, flag string
+	if runtime.GOOS == "windows" {
+		shell = "powershell"
+		flag = "-Command"
+	} else {
+		shell = "sh"
+		flag = "-c"
+	}
+
+	cmd := exec.Command(shell, flag, fullCmd)
 	cmd.Dir = comp.AbsPath
 	cmd.Env = env
 	cmd.Stdout = outW

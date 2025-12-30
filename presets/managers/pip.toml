@@ -1,8 +1,19 @@
+gitignore = [
+    "__pycache__/",
+    "*.py[cod]",
+    "*$py.class",
+    ".libs/",
+    "venv/",
+    ".venv/",
+    "env/"
+]
+
 [metadata]
 type = "pip"
 role = "package_manager"
 description = "Python with pip and venv"
 manifest_file = "requirements.txt"
+required_tools = ["python", "pip"]
 
 [scripts]
 run = "python main.py"
@@ -14,4 +25,4 @@ test = "pytest"
 
 [env]
 # Force packages to be installed locally to avoid global pollution
-PYTHONPATH = "${MNGPROJ_ROOT}/.libs"
+PYTHONPATH = "${MNGPROJ_COMPONENT_ROOT}/.libs"

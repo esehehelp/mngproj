@@ -1,15 +1,23 @@
+gitignore = [
+    "/target",
+    "**/*.rs.bk"
+]
+
 [metadata]
 type = "rust"
 role = "language"
-description = "Rust Programming Language (Cargo)"
+description = "Rust Programming Language"
+required_tools = ["cargo"]
+manifest_file = "Cargo.toml"
 
 [scripts]
 run = "cargo run"
-build = "cargo build --release"
+build = "cargo build"
 test = "cargo test"
-lint = "cargo clippy -- -D warnings"
-clean = "cargo clean"
-format = "cargo fmt"
+install = "cargo build" # Cargo handles deps automatically on build/run
+install_pkg = "cargo add"
+remove_pkg = "cargo remove"
+fmt = "cargo fmt"
 
 [env]
-RUST_BACKTRACE = "1"
+CARGO_TARGET_DIR = "${MNGPROJ_COMPONENT_ROOT}/target"

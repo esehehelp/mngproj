@@ -1,7 +1,19 @@
+gitignore = [
+    "/bin/",
+    "*.exe",
+    "*.dll",
+    "*.so",
+    "*.dylib",
+    "*.test",
+    "*.out",
+    "vendor/"
+]
+
 [metadata]
 type = "go"
 role = "language"
 description = "Go Programming Language"
+required_tools = ["go"]
 
 [scripts]
 run = "go run ."
@@ -10,4 +22,5 @@ test = "go test ./..."
 lint = "go vet ./..."
 
 [env]
-GOPATH = "${MNGPROJ_ROOT}/.go"
+
+GOPATH = "${MNGPROJ_COMPONENT_ROOT}/.go"

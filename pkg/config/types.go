@@ -38,11 +38,13 @@ type PresetConfig struct {
 	Metadata PresetMeta        `toml:"metadata"`
 	Scripts  map[string]string `toml:"scripts"`
 	Env      map[string]string `toml:"env"`
+	Gitignore []string         `toml:"gitignore"`
 }
 
 type PresetMeta struct {
-	Type         string `toml:"type"`
-	Role         string `toml:"role"` // language, framework, package_manager, tool
-	Description  string `toml:"description"`
-	ManifestFile string `toml:"manifest_file"` // e.g. "requirements.txt", "package.json"
+	Type          string   `toml:"type"`
+	Role          string   `toml:"role"` // language, framework, package_manager, tool
+	Description   string   `toml:"description"`
+	ManifestFile  string   `toml:"manifest_file"` // e.g. "requirements.txt", "package.json"
+	RequiredTools []string `toml:"required_tools"` // e.g. ["go", "docker"]
 }

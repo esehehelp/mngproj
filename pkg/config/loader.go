@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"runtime"
 
 	"github.com/pelletier/go-toml/v2"
 )
@@ -20,6 +21,16 @@ func LoadProjectConfig(path string) (*ProjectConfig, error) {
 		return nil, fmt.Errorf("failed to parse config file: %w", err)
 	}
 
+	// Validate component names for duplicates
+	seen := make(map[string]bool)
+	for i := range cfg.Components {
+		name := cfg.Components[i].Name
+		if seen[name] {
+			return nil, fmt.Errorf("duplicate component name found: %q", name)
+		}
+		seen[name] = true
+	}
+
 	// Set default path if empty
 	for i := range cfg.Components {
 		if cfg.Components[i].Path == "" {
@@ -31,15 +42,19 @@ func LoadProjectConfig(path string) (*ProjectConfig, error) {
 }
 
 // LoadPreset loads a preset configuration by type name
-// It looks for {type}.toml in the given presetsDir and its subdirectories
+// It prioritizes {type}_{GOOS}.toml, then falls back to {type}.toml
 func LoadPreset(presetsDir, typeName string) (*PresetConfig, error) {
-	filename := fmt.Sprintf("%s.toml", typeName)
-	
-	// Simple search: check root, then common subdirs
-	// Ideally using WalkDir, but for performance with known structure we can check direct paths
-	// or assume the user/tool knows the structure.
-	// Let's do a Walk to be robust.
-	
+	// 1. Try OS-specific preset
+	osSpecificName := fmt.Sprintf("%s_%s.toml", typeName, runtime.GOOS)
+	if preset, err := findAndLoadPreset(presetsDir, osSpecificName); err == nil {
+		return preset, nil
+	}
+
+	// 2. Fallback to standard preset
+	return findAndLoadPreset(presetsDir, fmt.Sprintf("%s.toml", typeName))
+}
+
+func findAndLoadPreset(presetsDir, filename string) (*PresetConfig, error) {
 	var foundPath string
 	err := filepath.WalkDir(presetsDir, func(path string, d os.DirEntry, err error) error {
 		if err != nil {
@@ -57,7 +72,7 @@ func LoadPreset(presetsDir, typeName string) (*PresetConfig, error) {
 	}
 
 	if foundPath == "" {
-		return nil, fmt.Errorf("preset %q not found in %s", typeName, presetsDir)
+		return nil, fmt.Errorf("preset file %q not found in %s", filename, presetsDir)
 	}
 
 	data, err := os.ReadFile(foundPath)

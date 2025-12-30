@@ -1,0 +1,18 @@
+gitignore = [
+    "target/",
+    ".mvn/"
+]
+
+[metadata]
+type = "maven"
+role = "package_manager"
+description = "Apache Maven"
+required_tools = ["mvn"]
+manifest_file = "pom.xml"
+
+[scripts]
+build = "mvn package"
+run = "mvn spring-boot:run" # Common use case, fallback to exec:java
+test = "mvn test"
+clean = "mvn clean"
+install = "mvn install"

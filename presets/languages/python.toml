@@ -1,12 +1,18 @@
+gitignore = [
+    "__pycache__/",
+    "*.py[cod]",
+    "*$py.class"
+]
+
 [metadata]
 type = "python"
 role = "language"
-description = "Python Language"
+description = "Python Programming Language"
+required_tools = ["python"]
 
 [scripts]
 run = "python main.py"
-build = "echo 'No build step for python'"
-test = "pytest"
+test = "python -m unittest"
 
 [env]
 PYTHONUNBUFFERED = "1"
